@@ -1,10 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using ToDoApp3;
 
 namespace ToDoApp3
 {
-    internal partial class ToDoViewModel: ObservableObject
+    internal partial class ToDoViewModel : ObservableObject
     {
         private ToDoModel _model;
 
@@ -16,10 +17,13 @@ namespace ToDoApp3
         [ObservableProperty]
         private DateTime _newToDoDeadline = DateTime.Today;
 
+        [ObservableProperty]
+        private int _newToDoPriority = 1;
+
         public ToDoViewModel()
         {
-             _model = new();
-             ListViewRows = new(_model.ToDos);
+            _model = new();
+            ListViewRows = new(_model.ToDos);
             foreach (var todo in ListViewRows)
             {
                 todo.PropertyChanged += ToDoPropertyChanged;
@@ -41,6 +45,9 @@ namespace ToDoApp3
                     case nameof(ToDo.Completed):
                         _model.UpdateCompleted(todo, todo.Completed);
                         break;
+                    case nameof(ToDo.Priority):
+                        _model.UpdatePriority(todo, todo.Priority);
+                        break;
                 }
             }
         }
@@ -49,8 +56,9 @@ namespace ToDoApp3
         private void AddToDo()
         {
             var todo = new ToDo(
-                name: NewToDoName, 
-                deadline: NewToDoDeadline
+                name: NewToDoName,
+                deadline: NewToDoDeadline,
+                priority: NewToDoPriority
                 );
             var newToDo = _model.Add(todo);
             if (newToDo != null)

@@ -18,16 +18,17 @@ namespace ToDoApp3
     internal class ToDoModel
     {
         public List<ToDo> ToDos { get; set; }
-            
+
         public ToDoModel()
         {
             using (var context = new ToDoContext())
             {
-                ToDos = context.ToDos.Select(t => new ToDo(t.Name, t.Deadline, t.Completed, t.Id)).ToList();
+                ToDos = context.ToDos.Select(t => new ToDo(t.Name, t.Deadline, t.Completed, t.Priority, t.Id)).ToList();
             }
         }
 
-        public void UpdateName(ToDo todo, string name) {
+        public void UpdateName(ToDo todo, string name)
+        {
             using (var context = new ToDoContext())
             {
                 var taskToUpdate = context.ToDos.Find(todo.Id);
@@ -39,7 +40,7 @@ namespace ToDoApp3
                 }
             }
         }
-         
+
         public void UpdateDeadline(ToDo todo, DateTime deadline)
         {
             using (var context = new ToDoContext())
@@ -68,18 +69,33 @@ namespace ToDoApp3
             }
         }
 
+        public void UpdatePriority(ToDo todo, int priority)
+        {
+            using (var context = new ToDoContext())
+            {
+                var taskToUpdate = context.ToDos.Find(todo.Id);
+                if (taskToUpdate != null)
+                {
+                    taskToUpdate.Priority = priority;
+                    context.SaveChanges();
+                    Debug.WriteLine($"Priority has been updated to {priority} in ToDo#{todo.Id}");
+                }
+            }
+        }
+
         public ToDo Add(ToDo todo)
         {
             ToDo newToDo;
             using (var context = new ToDoContext())
             {
                 EntityEntry<ToDo> entry = context.ToDos.Add(todo);
-                newToDo = entry.Entity; 
+                newToDo = entry.Entity;
                 context.SaveChanges();
                 Debug.WriteLine($"ToDo#{newToDo.Id} has been added");
             }
             return newToDo;
         }
+
         public void Delete(ToDo todo)
         {
             using (var context = new ToDoContext())
@@ -92,10 +108,10 @@ namespace ToDoApp3
                     Debug.WriteLine($"ToDo#{todo.Id} has been deleted");
                 }
             }
-        } 
+        }
     }
 
-    partial class ToDo(string name, DateTime deadline, bool completed = false, int? id = null) : ObservableObject
+    partial class ToDo(string name, DateTime deadline, bool completed = false, int priority = 1, int? id = null) : ObservableObject
     {
         public int? Id { get; set; } = id;
         [ObservableProperty]
@@ -104,5 +120,7 @@ namespace ToDoApp3
         private DateTime _deadline = deadline;
         [ObservableProperty]
         private bool _completed = completed;
+        [ObservableProperty]
+        private int _priority = priority;
     }
 }
